@@ -145,12 +145,34 @@ sequenceDiagram
 ## Setup & Deployment
 
 > [!IMPORTANT]
-> This project requires external API keys (Groq & Pinecone) to function. Please ensure you have these ready.
+> This project requires external API keys (Groq, Pinecone, and Google Custom Search) to function. Please ensure you have these ready.
 
 ### 1. Environment Configuration
 Both the frontend and backend require environment files. You will find `.env.example` templates in each directory.
 - **Frontend**: Create `frontend/.env` and set `NEXT_PUBLIC_API_URL`.
-- **Backend**: Create `backend/.env` and provide your `GROQ_API_KEY`, `PINECONE_API_KEY`, and `PINECONE_INDEX_NAME`.
+- **Backend**: Create `backend/.env` and provide your `GROQ_API_KEY`, `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `GOOGLE_SEARCH_API_KEY`, and `GOOGLE_SEARCH_ENGINE_ID`.
+
+#### How to Obtain API Keys
+- **Groq API Key**: Sign up at [Groq Console](https://console.groq.com) and create an API key.
+- **Pinecone**: Create an index at [Pinecone Console](https://app.pinecone.io) to get your API Key and Index Name.
+- **Google Custom Search**:
+  1. **API Key**: Go to [Google Cloud Console](https://console.cloud.google.com), create a project, enable the "Custom Search API", and create credentials (API Key).
+  2. **Search Engine ID**: Go to [Programmable Search Engine](https://programmablesearchengine.google.com), create a search engine (select "Search the entire web"), and copy the "Search engine ID" (cx).
+
+### Example .env Files
+**Backend** (`backend/.env`)
+```env
+GROQ_API_KEY=your_groq_api_key
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_INDEX_NAME=your_index_name
+GOOGLE_SEARCH_API_KEY=your_google_api_key
+GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id
+```
+
+**Frontend** (`frontend/.env`)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
 ### 2. Backend Setup
 ```bash
@@ -158,7 +180,7 @@ cd backend
 uv sync
 uv run main.py
 ```
-*The backend will be available at `http://localhost:8000` (or the port specified in `.env`).*
+*The backend will be available at `http://localhost:8000`.*
 
 ### 3. Frontend Setup
 ```bash
@@ -188,6 +210,7 @@ graph TB
         LLM[LLM Service]
         LangChain[LangChain]
         Langgraph[Langgraph]
+        GCS[Google Custom Search API]
     end
 
     subgraph Data Storage
@@ -199,7 +222,8 @@ graph TB
     Analyzer -->|Analysis| CNEngine
     CNEngine -->|Workflow| Langgraph
     Langgraph -->|Query| LLM
-    LLM -->|Search| Internet
+    Langgraph -->|Query| GCS
+    GCS -->|Results| Langgraph
     CNEngine -->|Store/Search| VectorDB
     API -->|Results| UI
 ```
