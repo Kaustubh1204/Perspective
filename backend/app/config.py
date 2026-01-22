@@ -8,7 +8,12 @@ class Settings(BaseSettings):
 
     # LLM Configuration
     LLM_PROVIDER: str = "groq"  # specific default
-    LLM_MODEL: str | None = None  # None means use provider default
+    LLM_MODEL: str | None = None  # Deprecated: use provider-specific models below
+    
+    # Provider-specific model configurations
+    OPENAI_MODEL: str | None = None
+    GROQ_MODEL: str | None = None
+    GEMINI_MODEL: str | None = None
 
     # API Keys
     GROQ_API_KEY: str | None = None
